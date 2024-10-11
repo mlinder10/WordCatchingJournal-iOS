@@ -15,12 +15,10 @@ struct LoadableData<T, U: View>: View {
     Group {
       if data.loading {
         ProgressView()
+      } else if let error = data.error {
+        Text(error)
       } else {
-        if let error = data.error {
-          Text(error)
-        } else {
-          content
-        }
+        content
       }
     }
   }

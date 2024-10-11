@@ -30,7 +30,7 @@ final class HttpClient {
     headers: [String: String] = [:],
     body: [String: Any] = [:]
   ) async throws -> T {
-    guard let url = URL(string: baseUrl + route) else { throw URLError(.badURL) }
+    guard let url = URL(string: "\(baseUrl)\(route)") else { throw URLError(.badURL) }
     var request = URLRequest(url: url)
     request.httpMethod = method.rawValue
     request.allHTTPHeaderFields = self.headers.merging(headers) { $1 }
@@ -45,8 +45,8 @@ final class HttpClient {
     return resp
   }
   
-  func config(baseUrl: String = "", headers: [String: String] = [:]) {
-    self.baseUrl = baseUrl
-    self.headers = headers
+  func config(baseUrl: String? = nil, headers: [String: String] = [:]) {
+    self.baseUrl = baseUrl ?? self.baseUrl
+    self.headers.merge(headers) { $1 }
   }
 }

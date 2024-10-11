@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SearchPage: View {
-  @State private var results = Response([NetworkManager.SearchResult]())
+  @State private var results = Response(NetworkManager.SearchResults())
   @State private var search = ""
   @State private var filter = [String]()
   
@@ -17,13 +17,11 @@ struct SearchPage: View {
       ScrollView {
         LoadableData(data: results) {
           LazyVStack {
-            ForEach(results.data) { result in
-              switch result {
-              case .user(let user):
-                Text(user.username)
-              case .post(let post):
-                PostView(post: post)
-              }
+            ForEach(results.data.users) { user in
+              Text(user.username)
+            }
+            ForEach($results.data.posts) { post in
+              PostView(post: post)
             }
           }
         }

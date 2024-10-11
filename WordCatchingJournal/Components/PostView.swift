@@ -9,10 +9,10 @@ import SwiftUI
 
 struct PostView: View {
   @EnvironmentObject private var store: Store
-  let post: Post
+  @Binding var post: Post
   
   var body: some View {
-    VStack(alignment: .leading) {
+    VStack(alignment: .leading, spacing: 8) {
       if post.userId == store.user?.id {
         profileLinkHeader
       } else {
@@ -25,6 +25,20 @@ struct PostView: View {
         .foregroundStyle(.secondary)
         .font(.caption)
         .italic()
+      HStack {
+        HStack {
+          Image(systemName: post.liked == 1 ? "heart.fill" : "heart")
+            .foregroundStyle(post.liked == 1 ? .red : .secondary)
+          Text("\(post.likesCount) \(post.likesCount == 1 ? "Like" : "Likes")")
+        }
+        HStack {
+          Image(systemName: post.favorited == 1 ? "star.fill" : "star")
+            .foregroundStyle(post.favorited == 1 ? .yellow : .secondary)
+          Text("\(post.favoritesCount) \(post.favoritesCount == 1 ? "Favorite" : "Favorites")")
+        }
+      }
+      .font(.caption)
+      .foregroundStyle(.secondary)
     }
   }
   
@@ -49,5 +63,10 @@ struct PostView: View {
         Spacer()
       }
     }
+    .foregroundStyle(.primary)
   }
+  
+  private func handleLike() {}
+  
+  private func handleFavorite() {}
 }

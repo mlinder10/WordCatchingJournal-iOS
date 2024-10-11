@@ -22,8 +22,17 @@ final class Store: ObservableObject {
     }
   }
   
-  func saveToken() {
+  private func saveToken() {
     guard let user = self.user, let token = user.token else { return }
     let _ = Keychain.shared.save(key: .token, data: token)
+  }
+  
+  private func deleteToken() {
+    let _ = Keychain.shared.save(key: .token, data: nil as String?)
+  }
+  
+  func logout() {
+    self.user = nil;
+    deleteToken()
   }
 }

@@ -15,7 +15,7 @@ struct FeedPage: View {
       LoadableData(data: posts) {
         ScrollView {
           LazyVStack {
-            ForEach(posts.data) { post in
+            ForEach($posts.data) { post in
               PostView(post: post)
               Divider()
                 .padding(.vertical)
@@ -34,7 +34,7 @@ struct FeedPage: View {
   }
   
   func fetchPosts() async {
-    await posts.fetch {
+    await posts.fetch("Failed to load posts") {
       try await NetworkManager.shared.fetchPosts()
     }
   }

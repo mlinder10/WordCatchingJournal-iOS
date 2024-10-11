@@ -62,7 +62,6 @@ struct RegisterPage: View {
       do {
         let user = try await NetworkManager.shared.register(email: email, username: username, password: password)
         store.user = user
-        print("got user, ", user)
       } catch {
         print(error.localizedDescription)
       }

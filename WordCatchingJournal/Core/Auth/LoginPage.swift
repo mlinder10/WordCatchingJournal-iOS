@@ -58,7 +58,6 @@ struct LoginPage: View {
       do {
         let user = try await NetworkManager.shared.login(email: email, password: password)
         store.user = user
-        print("got user, ", user)
       } catch {
         print(error.localizedDescription)
       }
