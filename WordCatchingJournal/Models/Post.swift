@@ -17,8 +17,8 @@ struct Post: Codable, Identifiable {
   let userId: String
   let username: String
   let profilePic: String?
-  let liked: Int
-  let favorited: Int
-  let likesCount: Int
-  let favoritesCount: Int
+  var liked: Int
+  var favorited: Int
+  var likesCount: Int
+  var favoritesCount: Int
 }

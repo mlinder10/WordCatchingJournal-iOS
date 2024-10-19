@@ -14,6 +14,7 @@ struct Base64Image<T: View>: View {
   var body: some View {
     if let data, let bytes = Data(base64Encoded: data), let uiImage = UIImage(data: bytes) {
       Image(uiImage: uiImage)
+        .resizable()
     } else {
       fallback
     }

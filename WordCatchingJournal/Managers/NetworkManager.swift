@@ -18,7 +18,7 @@ final class Response<T> {
     self.data = data
   }
   
-  func fetch(_ errorMessage: String = "", function: @escaping () async throws -> T) async {
+  func call(_ errorMessage: String = "", function: @escaping () async throws -> T) async {
     self.loading = true
     self.error = nil
     do {
@@ -134,18 +134,36 @@ final class NetworkManager {
     )
   }
   
-  struct SearchResults: Codable {
-    var users: [User]
-    var posts: [Post]
+  enum SearchResult: Decodable {
+    case post(Post)
+    case user(User)
     
-    init() {
-      self.users = []
-      self.posts = []
+    private enum CodingKeys: String, CodingKey {
+      case type
+    }
+    
+    init(from decoder: Decoder) throws {
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      let type = try container.decode(String.self, forKey: .type)
+      let singleValueContainer = try decoder.singleValueContainer()
+      
+      switch type {
+      case "post":
+        let post = try singleValueContainer.decode(Post.self)
+        self = .post(post)
+      case "user":
+        let user = try singleValueContainer.decode(User.self)
+        self = .user(user)
+      default:
+        throw DecodingError.dataCorruptedError(forKey: .type,
+                                               in: container,
+                                               debugDescription: "Unknown type: \(type)")
+      }
     }
   }
   
-  func fetchSearchResults(search: String, filter: [String] = []) async throws -> SearchResults {
-    return try await self.client.request(
+  func fetchSearchResults(search: String, filter: [String] = []) async throws -> ([User], [Post]) {
+    let res: [SearchResult] = try await self.client.request(
       method: .post,
       route: "/search",
       body: [
@@ -153,10 +171,24 @@ final class NetworkManager {
         "filter": filter
       ]
     )
+  
+    var users = [User]()
+    var posts = [Post]()
+    
+    for obj in res {
+      switch obj {
+      case .post(let post):
+        posts.append(post)
+      case .user(let user):
+        users.append(user)
+      }
+    }
+    
+    return (users, posts)
   }
   
   struct ProfileData: Codable {
-    let user: User
+    var user: User
     var posts: [Post]
     var isFollowing: Bool
     
@@ -165,8 +197,8 @@ final class NetworkManager {
       let username: String
       let profilePic: String?
       let posts: Int
-      let following: Int
-      let followers: Int
+      var following: Int
+      var followers: Int
     }
   }
   
@@ -239,7 +271,7 @@ final class NetworkManager {
     let favorited: Int
   }
   
-  func favorite(postId: String) async throws -> LikeResponse {
+  func favorite(postId: String) async throws -> FavoriteResponse {
     return try await self.client.request(
       method: .post,
       route: "/favorite",
@@ -249,12 +281,23 @@ final class NetworkManager {
     )
   }
   
-  func unfavorite(postId: String) async throws -> LikeResponse {
+  func unfavorite(postId: String) async throws -> FavoriteResponse {
     return try await self.client.request(
       method: .post,
       route: "/favorite/delete",
       body: [
         "postId": postId
+      ]
+    )
+  }
+  
+  func editProfile(username: String, profilePic: String?) async throws -> String {
+    return try await self.client.request(
+      method: .patch,
+      route: "/profile",
+      body: [
+        "username": username,
+        "profilePic": profilePic as Any
       ]
     )
   }

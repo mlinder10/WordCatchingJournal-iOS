@@ -9,13 +9,13 @@ import SwiftUI
 
 @main
 struct WordCatchingJournalApp: App {
-  @ObservedObject private var store = Store()
+  @StateObject private var store = Store()
   
   var body: some Scene {
     WindowGroup {
       if !store.loaded {
         // TODO: replace with loading screen
-        Text("Loading")
+        ProgressView("Loading...")
       } else {
         if store.user != nil {
           ProtectedRoutes()
@@ -39,7 +39,6 @@ struct AuthRoutes: View {
     Group {
       if page == .login {
         LoginPage { page = .register }
-        Text("")
       } else if page == .register {
         RegisterPage { page = .login }
       }
@@ -51,18 +50,31 @@ struct ProtectedRoutes: View {
   @EnvironmentObject private var store: Store
   
   var body: some View {
-    TabView {
-      FeedPage()
-        .tabItem { Label("Feed", systemImage: "calendar") }
-      PostPage()
-        .tabItem { Label("Post", systemImage: "plus")}
-      SearchPage()
-        .tabItem { Label("Search", systemImage: "magnifyingglass") }
-    }
-    .sheet(isPresented: $store.profileShown) {
-      if let user = store.user {
-        ProfilePage(userId: user.id, username: user.username, profilePic: user.profilePic)
+    TabView(selection: $store.tab) {
+      NavigationStack(path: $store.homeRoute) {
+        FeedPage()
+          .rootNavigator()
       }
+      .tabItem { Label("Feed", systemImage: "calendar") }
+      .tag(Tabs.home)
+      NavigationStack(path: $store.postRoute) {
+        PostPage()
+          .rootNavigator()
+      }
+      .tabItem { Label("Post", systemImage: "plus")}
+      .tag(Tabs.post)
+      NavigationStack(path: $store.searchRoute) {
+        SearchPage()
+          .rootNavigator()
+      }
+      .tabItem { Label("Search", systemImage: "magnifyingglass") }
+      .tag(Tabs.search)
+      NavigationStack(path: $store.profileRoute) {
+        ProfilePage(userId: store.user?.id ?? "", username: store.user?.username ?? "", profilePic: store.user?.profilePic ?? "")
+          .rootNavigator()
+      }
+      .tabItem { Label("Profile", systemImage: "person") }
+      .tag(Tabs.profile)
     }
   }
 }

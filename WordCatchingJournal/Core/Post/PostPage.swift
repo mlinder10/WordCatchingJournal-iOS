@@ -21,47 +21,93 @@ enum PartOfSpeech: String, CaseIterable, Identifiable {
 }
 
 struct PostPage: View {
+  @EnvironmentObject private var store: Store
+  @State private var search = ""
   @State private var word = ""
   @State private var definition = ""
   @State private var partOfSpeech: PartOfSpeech = .noun
   @State private var definitions = Response([DefinitionResponse.Word]())
+  @State private var post = Response<Post?>(nil)
+  @State private var fetchTimer: Timer?
   
   var body: some View {
-    NavigationStack {
+    VStack {
+      DefinitionsView(definitions: definitions) {
+        word = $0
+        definition = $1
+        partOfSpeech = PartOfSpeech(rawValue: $2) ?? .noun
+      }
+      .overlay(alignment: .bottomTrailing) {
+        if word != "" && definition != "" {
+          Button { handlePost() } label: {
+            Image(systemName: "plus")
+              .fontWeight(.semibold)
+              .padding(4)
+          }
+          .buttonStyle(.borderedProminent)
+          .buttonBorderShape(.circle)
+          .padding(.bottom)
+          .padding(.trailing)
+        }
+      }
       VStack {
-        DefinitionsView(definitions: definitions) { self.definition = $0 }
         Divider()
-        InputsView(
-          word: $word,
-          definition: $definition,
-          partOfSpeech: $partOfSpeech,
-          fetchDefinitions: fetchDefinitions
-        )
+        HStack {
+          TextField("Word", text: $word)
+          Spacer()
+          Picker("Part Of Speech", selection: $partOfSpeech) {
+            ForEach(PartOfSpeech.allCases) { pos in
+              Text(pos.rawValue)
+                .tag(pos)
+            }
+          }
+        }
+        TextField("Custom Definition", text: $definition, axis: .vertical)
+          .lineLimit(5, reservesSpace: false)
       }
-      .navigationTitle("Post")
-      .navigationBarTitleDisplayMode(.inline)
-      .toolbar {
-        ProfileLinkView()
-      }
+      .padding(.bottom)
+      .padding(.horizontal)
     }
+    .searchable(text: $search)
+    .navigationTitle("Post")
+    .navigationBarTitleDisplayMode(.inline)
+    .toolbar { ProfileLinkView() }
+    .onChange(of: search) { fetchDefinitions(word: $1) }
   }
   
-  func fetchDefinitions() {
-    Task {
-      await definitions.fetch("Failed to fetch definitions") {
-        try await NetworkManager.shared.fetchDefinitions(word: word.lowercased())
+  func fetchDefinitions(word: String) {
+    fetchTimer?.invalidate()
+    if search.count == 0 { return }
+    fetchTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
+      Task {
+        await definitions.call("Error finding definitions for \(word)") {
+          try await NetworkManager.shared.fetchDefinitions(word: word.lowercased())
+        }
       }
     }
   }
   
   func handlePost() {
-    Task {}
+    Task {
+      await post.call("Failed to post \(word)") {
+        try await NetworkManager.shared.createPost(
+          word: word,
+          definition: definition,
+          partOfSpeech: partOfSpeech.rawValue,
+          userId: store.user?.id ?? ""
+        )
+      }
+      word = ""
+      definition = ""
+      partOfSpeech = .noun
+      definitions.data = []
+    }
   }
 }
 
 fileprivate struct DefinitionsView: View {
   let definitions: Response<[DefinitionResponse.Word]>
-  let onTap: (String) -> Void
+  let onTap: (String, String, String) -> Void
   
   var body: some View {
     ScrollView {
@@ -82,7 +128,7 @@ fileprivate struct DefinitionsView: View {
                   }
                   .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .onTapGesture { onTap(d.definition) }
+                .onTapGesture { onTap(w.word.capitalized, d.definition, m.partOfSpeech.capitalized) }
               }
             }
           }
@@ -90,39 +136,6 @@ fileprivate struct DefinitionsView: View {
       }
       .padding()
     }
-  }
-}
-
-fileprivate struct InputsView: View {
-  @Binding var word: String
-  @Binding var definition: String
-  @Binding var partOfSpeech: PartOfSpeech
-  var fetchDefinitions: () -> Void
-  
-  var body: some View {
-    VStack(alignment: .leading) {
-      HStack {
-        TextField("Word", text: $word)
-        Button { fetchDefinitions() } label: {
-          Text("Search")
-        }
-        .buttonStyle(.borderedProminent)
-      }
-      TextField("Definition", text: $definition)
-        .lineLimit(4, reservesSpace: true)
-      Picker("Part Of Speech", selection: $partOfSpeech) {
-        ForEach(PartOfSpeech.allCases) { pos in
-          Text(pos.rawValue)
-            .tag(pos)
-        }
-      }
-      Button {} label: {
-        Text("Post")
-          .frame(maxWidth: .infinity)
-      }
-      .buttonStyle(.borderedProminent)
-    }
-    .padding()
   }
 }
 

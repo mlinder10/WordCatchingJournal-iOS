@@ -34,24 +34,5 @@ enum DefinitionResponse {
     let example: String?
     let synonyms: [String]?
     let antonyms: [String]?
-    
-//    static func from(_ words: [Word]) -> [Response] {
-//      return words.flatMap { word in
-//        word.meanings.flatMap { meaning in
-//          meaning.definitions.compactMap { definition in
-//            Response(
-//              word: word.word,
-//              phonetic: word.phonetic,
-//              origin: word.origin,
-//              partOfSpeech: meaning.partOfSpeech,
-//              definition: definition.definition,
-//              example: definition.example,
-//              synonyms: definition.synonyms,
-//              antonyms: definition.antonyms
-//            )
-//          }
-//        }
-//      }
-//    }
   }
 }

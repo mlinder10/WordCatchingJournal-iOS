@@ -21,7 +21,10 @@ struct ProfilePic: View {
         .overlay {
           Text(username.first?.uppercased() ?? "")
             .fontWeight(.semibold)
+            .font(.system(size: size / 2.5))
         }
     }
+    .frame(width: size, height: size)
+    .clipShape(Circle())
   }
 }

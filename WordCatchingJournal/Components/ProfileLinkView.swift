@@ -12,7 +12,7 @@ struct ProfileLinkView: View {
   
   var body: some View {
     ProfilePic(username: store.user?.username ?? "", profilePic: store.user?.profilePic)
-      .onTapGesture { store.profileShown = true }
+      .onTapGesture { store.openProfile() }
   }
 }
 
