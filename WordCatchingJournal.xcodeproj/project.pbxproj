@@ -30,6 +30,8 @@
 		149AF9582CA4BBA2003672FF /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 149AF9572CA4BBA2003672FF /* User.swift */; };
 		149AF95A2CA4BBB4003672FF /* DefinitionResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 149AF9592CA4BBB3003672FF /* DefinitionResponse.swift */; };
 		14AB8A7C2CC4063D00BA7123 /* EditProfilePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14AB8A7B2CC4063D00BA7123 /* EditProfilePage.swift */; };
+		14AF78372CC466100034DC8E /* ProfileOptionsPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14AF78362CC466100034DC8E /* ProfileOptionsPage.swift */; };
+		14C2FFD22CC48722000F42C3 /* PostFinalizePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C2FFD12CC48722000F42C3 /* PostFinalizePage.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -57,6 +59,8 @@
 		149AF9572CA4BBA2003672FF /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		149AF9592CA4BBB3003672FF /* DefinitionResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefinitionResponse.swift; sourceTree = "<group>"; };
 		14AB8A7B2CC4063D00BA7123 /* EditProfilePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfilePage.swift; sourceTree = "<group>"; };
+		14AF78362CC466100034DC8E /* ProfileOptionsPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileOptionsPage.swift; sourceTree = "<group>"; };
+		14C2FFD12CC48722000F42C3 /* PostFinalizePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostFinalizePage.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,6 +116,7 @@
 			children = (
 				1404BB8F2CA7B2E900B0ECBE /* ProfilePage.swift */,
 				14AB8A7B2CC4063D00BA7123 /* EditProfilePage.swift */,
+				14AF78362CC466100034DC8E /* ProfileOptionsPage.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -170,6 +175,7 @@
 			isa = PBXGroup;
 			children = (
 				1449752F2CA8B0080088B038 /* PostPage.swift */,
+				14C2FFD12CC48722000F42C3 /* PostFinalizePage.swift */,
 			);
 			path = Post;
 			sourceTree = "<group>";
@@ -251,7 +257,6 @@
 			);
 			mainGroup = 14821DBC2C6F1108003D478A;
 			packageReferences = (
-				1481CADD2C92754D005C7513 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 			);
 			productRefGroup = 14821DC62C6F1108003D478A /* Products */;
 			projectDirPath = "";
@@ -285,6 +290,7 @@
 				1404BB802CA7A5A200B0ECBE /* Extensions.swift in Sources */,
 				144975322CA8B9630088B038 /* ProfileLinkView.swift in Sources */,
 				1404BB8D2CA7AEC800B0ECBE /* FeedPage.swift in Sources */,
+				14C2FFD22CC48722000F42C3 /* PostFinalizePage.swift in Sources */,
 				149AF9522CA4BA7A003672FF /* HttpClient.swift in Sources */,
 				144975302CA8B0080088B038 /* PostPage.swift in Sources */,
 				1404BB7B2CA7A35E00B0ECBE /* KeychainManager.swift in Sources */,
@@ -294,6 +300,7 @@
 				1404BB8A2CA7AE4600B0ECBE /* ProfilePic.swift in Sources */,
 				1404BB922CA7B37D00B0ECBE /* PostView.swift in Sources */,
 				149AF95A2CA4BBB4003672FF /* DefinitionResponse.swift in Sources */,
+				14AF78372CC466100034DC8E /* ProfileOptionsPage.swift in Sources */,
 				1445B1112CA8C7B900824F74 /* SearchPage.swift in Sources */,
 				149AF9582CA4BBA2003672FF /* User.swift in Sources */,
 				1404BB902CA7B2E900B0ECBE /* ProfilePage.swift in Sources */,
@@ -436,11 +443,13 @@
 				DEVELOPMENT_TEAM = T6D837MWJ7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -448,6 +457,10 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mattlinder.WordCatchingJournal;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -465,11 +478,13 @@
 				DEVELOPMENT_TEAM = T6D837MWJ7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -477,6 +492,10 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mattlinder.WordCatchingJournal;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -505,17 +524,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		1481CADD2C92754D005C7513 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/scinfu/SwiftSoup";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.7.5;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
 	};
 	rootObject = 14821DBD2C6F1108003D478A /* Project object */;
 }

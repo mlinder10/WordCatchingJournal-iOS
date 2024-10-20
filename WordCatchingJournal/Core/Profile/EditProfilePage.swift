@@ -8,19 +8,16 @@
 import SwiftUI
 import PhotosUI
 
+// Might want to update each attribute with seperate api calls
+// so images don't need to be sent on each one
 struct EditProfilePage: View {
+  @EnvironmentObject private var store: Store
   @Environment(\.dismiss) private var dismiss
   @State private var saveChanges = Response<String?>(nil)
-  @State private var username: String
-  @State private var profilePic: String?
+  @State var username: String
+  @State var profilePic: String?
   @State private var photo: PhotosPickerItem?
   let userId: String
-  
-  init(userId: String, username: String, profilePic: String?) {
-    self.userId = userId
-    self.username = username
-    self.profilePic = profilePic
-  }
   
   var body: some View {
     Form {
@@ -61,14 +58,20 @@ struct EditProfilePage: View {
   func handleSave() {
     Task {
       await saveChanges.call("Error saving changes") {
-        try await NetworkManager.shared.editProfile(username: username, profilePic: profilePic)
+        let res = try await NetworkManager.shared.editProfile(userId: userId, username: username, profilePic: profilePic)
+        store.user?.username = username
+        store.user?.profilePic = profilePic
+        return res
+      }
+      if saveChanges.error == nil {
+        dismiss()
       }
     }
   }
   
   func handleUploadProfilePic(_ photo: PhotosPickerItem?) {
     Task {
-      let b64 = await photo?.toBase64()
+      let b64 = await photo?.compress(quality: 0.7, width: 300, height: 300)?.base64EncodedString()
       await MainActor.run {
         self.profilePic = b64
       }
@@ -78,6 +81,6 @@ struct EditProfilePage: View {
 
 #Preview {
   NavigationStack {
-    EditProfilePage(userId: "", username: "mattl", profilePic: nil)
+    EditProfilePage(username: "mattl", profilePic: nil, userId: "")
   }
 }

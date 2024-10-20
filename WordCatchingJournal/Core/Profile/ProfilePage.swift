@@ -31,11 +31,18 @@ struct ProfilePage: View {
     .task { await fetchProfileData() }
     .navigationTitle(username)
     .navigationBarTitleDisplayMode(.inline)
+    .toolbar {
+      ToolbarItem(placement: .topBarTrailing) {
+        Button { store.openProfileOptions() } label: {
+          Image(systemName: "line.3.horizontal")
+        }
+      }
+    }
   }
   
   var header: some View {
     HStack {
-        ProfilePic(username: username, profilePic: profilePic, size: 80)
+      ProfilePic(username: username, profilePic: profilePic, size: 80)
       Spacer()
       VStack(spacing: 12) {
         HStack(spacing: 12) {
@@ -62,7 +69,7 @@ struct ProfilePage: View {
           }
         }
         if userId == store.user?.id {
-          Button {} label: {
+          Button { store.openEditProfile() } label: {
             Text("Edit Profile")
               .font(.caption)
               .frame(width: 150)

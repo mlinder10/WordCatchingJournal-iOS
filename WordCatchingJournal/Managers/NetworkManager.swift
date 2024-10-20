@@ -85,9 +85,10 @@ final class NetworkManager {
     )
   }
   
-  func fetchDefinitions(word: String) async throws -> [DefinitionResponse.Word] {
+  func fetchDefinitions(word: String) async throws -> [Definition] {
     let client = HttpClient(baseUrl: DICT_URL)
-    return try await client.request(route: word)
+    let response: [DefinitionResponse.Word] = try await client.request(route: word)
+    return response.toModel()
   }
   
   func fetchPosts() async throws -> [Post] {
@@ -291,10 +292,10 @@ final class NetworkManager {
     )
   }
   
-  func editProfile(username: String, profilePic: String?) async throws -> String {
+  func editProfile(userId: String, username: String, profilePic: String?) async throws -> String {
     return try await self.client.request(
       method: .patch,
-      route: "/profile",
+      route: "/users/\(userId)",
       body: [
         "username": username,
         "profilePic": profilePic as Any

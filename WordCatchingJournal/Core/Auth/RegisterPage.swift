@@ -9,6 +9,7 @@ import SwiftUI
 
 struct RegisterPage: View {
   @EnvironmentObject private var store: Store
+  @State private var register = Response<User?>(nil)
   @State private var username = ""
   @State private var email = ""
   @State private var password = ""
@@ -16,23 +17,24 @@ struct RegisterPage: View {
   
   var body: some View {
     VStack {
-      Image("wcj-logo")
-        .resizable()
-        .aspectRatio(contentMode: .fit)
-        .padding(.vertical, 32)
-      TextField("Email", text: $email)
-        .autocorrectionDisabled()
-        .textInputAutocapitalization(.never)
-      TextField("Username", text: $username)
-        .autocorrectionDisabled()
-        .textInputAutocapitalization(.never)
-      SecureField("Password", text: $password)
       Spacer()
+      VStack {
+        TextField("Email", text: $email)
+          .keyboardType(.emailAddress)
+          .autocorrectionDisabled()
+          .textInputAutocapitalization(.never)
+        TextField("Username", text: $username)
+          .autocorrectionDisabled()
+          .textInputAutocapitalization(.never)
+        SecureField("Password", text: $password)
+      }
+      .padding()
       VStack(spacing: 16) {
         Button { handleRegister() } label: {
           Text("Register")
             .frame(maxWidth: .infinity)
         }
+        .disabled(register.loading)
         .buttonStyle(.borderedProminent)
         HStack(spacing: 12) {
           Rectangle()
@@ -59,11 +61,10 @@ struct RegisterPage: View {
   
   func handleRegister() {
     Task {
-      do {
+      await register.call("Failed to register") {
         let user = try await NetworkManager.shared.register(email: email, username: username, password: password)
         store.user = user
-      } catch {
-        print(error.localizedDescription)
+        return user
       }
     }
   }

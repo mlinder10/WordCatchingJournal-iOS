@@ -10,6 +10,6 @@ import Foundation
 struct User: Codable, Identifiable {
   let id: String
   let token: String?
-  let username: String
-  let profilePic: String?
+  var username: String
+  var profilePic: String?
 }

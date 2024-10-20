@@ -24,60 +24,111 @@ struct PostPage: View {
   @EnvironmentObject private var store: Store
   @State private var search = ""
   @State private var word = ""
-  @State private var definition = ""
-  @State private var partOfSpeech: PartOfSpeech = .noun
-  @State private var definitions = Response([DefinitionResponse.Word]())
+  @State private var selectedDefinition: Definition? = nil
+  @State private var definitions = Response([Definition]())
   @State private var post = Response<Post?>(nil)
   @State private var fetchTimer: Timer?
   
   var body: some View {
-    VStack {
-      DefinitionsView(definitions: definitions) {
-        word = $0
-        definition = $1
-        partOfSpeech = PartOfSpeech(rawValue: $2) ?? .noun
+    Group {
+      if definitions.loading {
+        loadingView
+      } else if search.isEmpty {
+        emptyView
+      } else if definitions.error != nil {
+        errorView
+      }  else {
+        defsView
       }
-      .overlay(alignment: .bottomTrailing) {
-        if word != "" && definition != "" {
-          Button { handlePost() } label: {
-            Image(systemName: "plus")
-              .fontWeight(.semibold)
-              .padding(4)
-          }
-          .buttonStyle(.borderedProminent)
-          .buttonBorderShape(.circle)
-          .padding(.bottom)
-          .padding(.trailing)
-        }
-      }
-      VStack {
-        Divider()
-        HStack {
-          TextField("Word", text: $word)
-          Spacer()
-          Picker("Part Of Speech", selection: $partOfSpeech) {
-            ForEach(PartOfSpeech.allCases) { pos in
-              Text(pos.rawValue)
-                .tag(pos)
-            }
-          }
-        }
-        TextField("Custom Definition", text: $definition, axis: .vertical)
-          .lineLimit(5, reservesSpace: false)
-      }
-      .padding(.bottom)
-      .padding(.horizontal)
     }
     .searchable(text: $search)
     .navigationTitle("Post")
     .navigationBarTitleDisplayMode(.inline)
     .toolbar { ProfileLinkView() }
     .onChange(of: search) { fetchDefinitions(word: $1) }
+    .overlay(alignment: .bottomTrailing) {
+      if let selectedDefinition {
+        Button { store.openPostFinalize(selectedDefinition) } label: {
+          Image(systemName: "arrow.right")
+            .fontWeight(.semibold)
+            .padding(4)
+        }
+        .buttonStyle(.borderedProminent)
+        .buttonBorderShape(.circle)
+        .padding(.bottom)
+        .padding(.trailing)
+      }
+    }
+  }
+  
+  var loadingView: some View {
+    ProgressView()
+  }
+  
+  var emptyView: some View {
+    VStack {
+      Text("Search for a word's definitions or create one yourself")
+        .multilineTextAlignment(.center)
+      Button {
+        store.openPostFinalize(Definition(word: "", definition: "", partOfSpeech: ""))
+      } label: {
+        HStack {
+          Text("Custom")
+          Image(systemName: "arrow.right")
+        }
+      }
+      .buttonStyle(.borderedProminent)
+    }
+  }
+  
+  var errorView: some View {
+    VStack {
+      Text("No results for \"\(search)\"")
+        .fontWeight(.semibold)
+      Text("Enter a custom definition")
+        .foregroundStyle(.secondary)
+      Button {
+        store.openPostFinalize(Definition(word: search, definition: "", partOfSpeech: ""))
+      } label: {
+        HStack {
+          Text("Next")
+          Image(systemName: "arrow.right")
+        }
+      }
+      .buttonStyle(.borderedProminent)
+    }
+  }
+  
+  var defsView: some View {
+    ScrollView {
+      LazyVStack {
+        ForEach(definitions.data, id: \.hashValue) { data in
+          GroupBox {
+            VStack(alignment: .leading) {
+              Text(data.word.capitalized)
+                .fontWeight(.semibold)
+              Text(data.definition)
+              Text(data.partOfSpeech.capitalized)
+                .italic()
+                .foregroundStyle(.secondary)
+                .font(.caption)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+          }
+          .border(selectedDefinition == data ? Color.accentColor : Color.clear)
+          .onTapGesture {
+            selectedDefinition = selectedDefinition == data ? nil : data
+          }
+        }
+      }
+      .padding()
+    }
+    .scrollDismissesKeyboard(.interactively)
   }
   
   func fetchDefinitions(word: String) {
+    selectedDefinition = nil
     fetchTimer?.invalidate()
-    if search.count == 0 { return }
     fetchTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
       Task {
         await definitions.call("Error finding definitions for \(word)") {
@@ -86,59 +137,10 @@ struct PostPage: View {
       }
     }
   }
-  
-  func handlePost() {
-    Task {
-      await post.call("Failed to post \(word)") {
-        try await NetworkManager.shared.createPost(
-          word: word,
-          definition: definition,
-          partOfSpeech: partOfSpeech.rawValue,
-          userId: store.user?.id ?? ""
-        )
-      }
-      word = ""
-      definition = ""
-      partOfSpeech = .noun
-      definitions.data = []
-    }
-  }
-}
-
-fileprivate struct DefinitionsView: View {
-  let definitions: Response<[DefinitionResponse.Word]>
-  let onTap: (String, String, String) -> Void
-  
-  var body: some View {
-    ScrollView {
-      LoadableData(data: definitions) {
-        LazyVStack {
-          ForEach(definitions.data, id: \.self) { w in
-            ForEach(w.meanings, id: \.self) { m in
-              ForEach(m.definitions, id: \.self) { d in
-                GroupBox {
-                  VStack(alignment: .leading) {
-                    Text(w.word.capitalized)
-                      .fontWeight(.semibold)
-                    Text(d.definition)
-                    Text(m.partOfSpeech.capitalized)
-                      .italic()
-                      .foregroundStyle(.secondary)
-                      .font(.caption)
-                  }
-                  .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .onTapGesture { onTap(w.word.capitalized, d.definition, m.partOfSpeech.capitalized) }
-              }
-            }
-          }
-        }
-      }
-      .padding()
-    }
-  }
 }
 
 #Preview {
-  PostPage()
+  NavigationStack {
+    PostPage()
+  }
 }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 enum Tabs {
   case home
@@ -15,7 +16,15 @@ enum Tabs {
 }
 
 enum Route: Hashable {
+  // shared
   case profile(ProfileData)
+  
+  // post
+  case postFinalize(Definition)
+  
+  // profile
+  case editProfile(ProfileData)
+  case profileOptions
 }
 
 struct ProfileData: Hashable {
@@ -84,9 +93,16 @@ final class Store: ObservableObject {
     deleteToken()
   }
   
-  func openProfile() {
-    guard let user else { return }
-    openProfile(id: user.id, username: user.username, profilePic: user.profilePic)
+  // shared
+  
+  func canNavigateBack() -> Bool {
+    return !currentRoute.isEmpty
+  }
+  
+  func navigateBack() {
+    if canNavigateBack() {
+      currentRoute.removeLast()
+    }
   }
   
   func openProfile(id: String, username: String, profilePic: String?) {
@@ -102,13 +118,48 @@ final class Store: ObservableObject {
     }
   }
   
-  func canNavigateBack() -> Bool {
-    return !currentRoute.isEmpty
+  // post
+  
+  func openPostFinalize(_ definition: Definition) {
+    guard tab == .post else { return }
+    postRoute.append(.postFinalize(definition))
   }
   
-  func navigateBack() {
-    if canNavigateBack() {
-      currentRoute.removeLast()
-    }
+  // profile
+  
+  func openProfile() {
+    guard let user else { return }
+    openProfile(id: user.id, username: user.username, profilePic: user.profilePic)
+  }
+  
+  func openEditProfile() {
+    guard let user, tab == .profile else { return }
+    profileRoute.append(.editProfile(ProfileData(id: user.id, username: user.username, profilePic: user.profilePic)))
+  }
+  
+  func openProfileOptions() {
+    guard tab == .profile else { return }
+    profileRoute.append(.profileOptions)
+  }
+}
+
+extension View {
+  func rootNavigator() -> some View {
+    self.navigationDestination(for: Route.self) { route in
+        switch route {
+        case .profile(let profile):
+          ProfilePage(userId: profile.id, username: profile.username, profilePic: profile.profilePic)
+        case .editProfile(let profile):
+          EditProfilePage(username: profile.username, profilePic: profile.profilePic, userId: profile.id)
+        case .profileOptions:
+          ProfileOptionsPage()
+        case .postFinalize(let def):
+          PostFinalizePage(
+            word: def.word,
+            partOfSpeech: PartOfSpeech(rawValue: def.partOfSpeech) ?? .noun,
+            definition: def.definition
+          )
+        }
+      }
   }
 }
